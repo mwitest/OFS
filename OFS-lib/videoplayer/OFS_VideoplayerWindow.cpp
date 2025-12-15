@@ -201,7 +201,97 @@ void OFS_VideoplayerWindow::DrawVideoPlayer(bool* open, bool* drawVideo) noexcep
 	OFS_PROFILE(__FUNCTION__);
 	if (open != nullptr && !*open) return;
 	
-	ImGui::Begin(TR_ID("VIDEOPLAYER", Tr::VIDEOPLAYER), open, ImGuiWindowFlags_None | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar);
+	// Agregar variable para pantalla completa
+	static bool videoFullscreen = false;
+	static double lastClickTime = 0;
+	static bool isSDLFullscreen = false;
+	
+	// Configurar flags de ventana - NO tocamos el docking
+	ImGuiWindowFlags windowFlags = ImGuiWindowFlags_None | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar;
+	
+	// SOLO cuando está en pantalla completa hacemos cambios
+	if (videoFullscreen) {
+		// 1. Poner ventana SDL en pantalla completa REAL (oculta barra de tareas)
+		if (!isSDLFullscreen) {
+			SDL_Window* window = SDL_GL_GetCurrentWindow();
+			SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+			isSDLFullscreen = true;
+		}
+		
+		// 2. Crear ventana ImGui que ocupe TODO (sin bordes)
+		ImGuiWindowFlags fullscreenFlags = ImGuiWindowFlags_NoDecoration | 
+										   ImGuiWindowFlags_NoMove | 
+										   ImGuiWindowFlags_NoResize |
+										   ImGuiWindowFlags_NoScrollWithMouse | 
+										   ImGuiWindowFlags_NoScrollbar;
+		
+		const ImGuiViewport* viewport = ImGui::GetMainViewport();
+		ImGui::SetNextWindowPos(viewport->Pos);
+		ImGui::SetNextWindowSize(viewport->Size);
+		
+		char windowName[256];
+		stbsp_snprintf(windowName, sizeof(windowName), "##FullscreenVideo_%p", this);
+		ImGui::Begin(windowName, nullptr, fullscreenFlags);
+		
+		if (*drawVideo && player->VideoLoaded()) {
+			auto drawList = ImGui::GetWindowDrawList();
+			auto& state = VideoPlayerWindowState::State(stateHandle);
+			
+			// Detectar doble clic para salir de pantalla completa
+			static double fullscreenLastClick = 0;
+			bool isHovered = ImGui::IsWindowHovered();
+			if (isHovered && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+				double currentTime = ImGui::GetTime();
+				if (currentTime - fullscreenLastClick < 0.5) {
+					videoFullscreen = false;
+				}
+				fullscreenLastClick = currentTime;
+			}
+			
+			// Dibujar el video ocupando toda la ventana
+			ImVec2 windowSize = ImGui::GetWindowSize();
+			ImVec2 videoSize(player->VideoWidth(), player->VideoHeight());
+			
+			// Calcular escala para mantener relación de aspecto
+			float scaleX = windowSize.x / videoSize.x;
+			float scaleY = windowSize.y / videoSize.y;
+			float scale = std::min(scaleX, scaleY);
+			
+			videoSize.x *= scale;
+			videoSize.y *= scale;
+			
+			// Centrar el video
+			ImVec2 pos = (windowSize - videoSize) * 0.5f;
+			ImGui::SetCursorPos(pos);
+			
+			// Dibujar el video
+			OFS::ImageWithId(videoImageId, (void*)(intptr_t)player->FrameTexture(), videoSize);
+			
+			// Salir con ESC
+			if (ImGui::IsKeyPressed(ImGuiKey_Escape)) {
+				videoFullscreen = false;
+			}
+		}
+		
+		ImGui::End();
+		
+		// IMPORTANTE: También dibujamos la ventana normal PERO invisible
+		// para mantener su estado de docking
+		ImGui::Begin(TR_ID("VIDEOPLAYER", Tr::VIDEOPLAYER), open, ImGuiWindowFlags_NoNav);
+		ImGui::End();
+		
+		return; // Salir temprano, ya dibujamos todo
+	}
+	
+	// SALIR de pantalla completa SDL si estábamos en ese modo
+	if (isSDLFullscreen) {
+		SDL_Window* window = SDL_GL_GetCurrentWindow();
+		SDL_SetWindowFullscreen(window, 0);
+		isSDLFullscreen = false;
+	}
+	
+	// VENTANA NORMAL (no pantalla completa)
+	ImGui::Begin(TR_ID("VIDEOPLAYER", Tr::VIDEOPLAYER), open, windowFlags);
 
 	if (!player->VideoLoaded()) {
 		ImGui::End();
@@ -212,6 +302,16 @@ void OFS_VideoplayerWindow::DrawVideoPlayer(bool* open, bool* drawVideo) noexcep
 		viewportPos = ImGui::GetWindowViewport()->Pos;
 		auto drawList = ImGui::GetWindowDrawList();
 		auto& state = VideoPlayerWindowState::State(stateHandle);
+		
+		// Detectar doble clic en el video
+		if (videoHovered && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+			double currentTime = ImGui::GetTime();
+			if (currentTime - lastClickTime < 0.5) { // Doble clic en 500ms
+				videoFullscreen = true;
+			}
+			lastClickTime = currentTime;
+		}
+		
 		if (state.activeMode != VideoMode::VrMode) {
 			draw2dVideo(drawList);
 		}
@@ -241,6 +341,7 @@ void OFS_VideoplayerWindow::DrawVideoPlayer(bool* open, bool* drawVideo) noexcep
 			*drawVideo = true;
 		}
 	}
+	
 	windowPos = ImGui::GetWindowPos() - viewportPos;
 	ImGui::End();
 }
