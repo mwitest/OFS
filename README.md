@@ -4,15 +4,19 @@ The project is based on OpenGL, SDL2, ImGui, libmpv, & all these other great [li
 
 ![OpenFunscripter Screenshot](https://github.com/OpenFunscripter/OpenFunscripter/blob/1b4f096be8c2f6c75ceed7787a300a86a13fb167/OpenFunscripter.jpg)
 
-Updates and New Features
+Updates and New Features (This Fork)
 
-New configuration file: The joystick_config.txt file has been added, containing the custom button mapping for a DirectInput controller, which is emulated as XInput within the application.
+DirectInput controller support:
+Old DirectInput controllers are now recognized as XInput devices.
 
-Controller module modification: The controller input module has been modified to support DirectInput controllers and map their buttons to a format compatible with XInput. This allows DirectInput controllers to be recognized and used as XInput controllers within the application.
+Windowed full-screen video mode: Added the ability to enter full-screen mode by double-clicking the video.
 
-Full-screen video mode: Added a windowed full-screen option for video playback.
+Joystick configuration file:
+joystick_config.txt stores custom button mappings and must be in the same directory as the executable.
 
-The joystick_config.txt file must be placed in the same directory as the executable, as it is used to load the button mapping configuration when the application is run.
+Default joystick axis centering:
+The option to center the joystick axis is now unchecked by default.
+
 
 ### How to build ( for people who want to contribute or fork )
 1. Clone the repository
@@ -22,9 +26,21 @@ The joystick_config.txt file must be placed in the same directory as the executa
 
 Known linux dependencies to just compile are `build-essential libmpv-dev libglvnd-dev`.  
 
-### Windows libmpv binaries used
-Currently using: [mpv-dev-x86_64-v3-20220925-git-56e24d5.7z (it's part of the repository)](https://sourceforge.net/projects/mpv-player-windows/files/libmpv/)
+Windows libmpv Binaries (Important)
+
+⚠️ Important: This has been tested with a pre-v3 version of libmpv using mpv-2.dll.  
+v3 versions of libmpv **may not be compatible**.  
+The library libmpv.dll is **not compatible** and will prevent the program from starting.  
+If the program does not open and shows no error, it is likely due to using an incompatible version of libmpv.
+
+Confirmed working version for this fork:
+
+mpv-dev-x86_64-20221211-git-cf349d6.7z
+
+
+https://sourceforge.net/projects/mpv-player-windows/files/libmpv/
 
 ### Platforms
-I'm providing windows binaries and a linux AppImage.
-In theory OSX should work as well but I lack the hardware to set any of that up.
+
+Windows. Tested.
+Linux or macOS. Not tested 
