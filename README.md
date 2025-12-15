@@ -4,6 +4,16 @@ The project is based on OpenGL, SDL2, ImGui, libmpv, & all these other great [li
 
 ![OpenFunscripter Screenshot](https://github.com/OpenFunscripter/OpenFunscripter/blob/1b4f096be8c2f6c75ceed7787a300a86a13fb167/OpenFunscripter.jpg)
 
+Updates and New Features
+
+New configuration file: The joystick_config.txt file has been added, containing the custom button mapping for a DirectInput controller, which is emulated as XInput within the application.
+
+Controller module modification: The controller input module has been modified to support DirectInput controllers and map their buttons to a format compatible with XInput. This allows DirectInput controllers to be recognized and used as XInput controllers within the application.
+
+Full-screen video mode: Added a windowed full-screen option for video playback.
+
+The joystick_config.txt file must be placed in the same directory as the executable, as it is used to load the button mapping configuration when the application is run.
+
 ### How to build ( for people who want to contribute or fork )
 1. Clone the repository
 2. `cd "OpenFunscripter"`

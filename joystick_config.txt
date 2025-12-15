@@ -1,0 +1,16 @@
+# Button Configuration
+# Format: BUTTON=PHYSICAL_NUMBER
+
+A=0
+B=1
+X=2
+Y=3
+LB=6
+RB=4
+BACK=8      # If BACK is actually 6
+START=9     # START must be different from R3
+L3=10       # Left stick click
+R3=11       # Right stick click
+LT=7        # Or the correct number for L2
+RT=5        # Or the correct number for R2
+
