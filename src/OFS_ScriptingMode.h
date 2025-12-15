@@ -81,7 +81,7 @@ private:
     int32_t ControllerDeadzone = 1750;
     int32_t currentPosX = 0;
     int32_t currentPosY = 0;
-    bool controllerCenter = true;
+    bool controllerCenter = false;
     bool automaticRecording = true;
     bool inverted = false;
 

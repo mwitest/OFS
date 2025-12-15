@@ -34,7 +34,7 @@ struct OpenFunscripterState
     bool showVideo = true;
 
     bool showActionEditor = false;
-    bool showStatistics = true;
+    bool showStatistics = false;
     bool alwaysShowBookmarkLabels = false;
     bool showHistory = true;
     bool showSimulator = true;
